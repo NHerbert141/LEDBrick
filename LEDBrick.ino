@@ -20,6 +20,9 @@
 
 #define ALERT_TIME_MS 1500 // When a status alert is posted, this is how long it blinks for (5 blinks)
 
+#define MIN_LED_DUTY 0 
+#define MAX_LED_DUTY 100
+
 #define MIN_SUM_FADE_CHANGE 10 // When a random fade is commanded, this is the minimum intensity change (0-255)
 #define MIN_SUM_BRIGHTNESS 75 // When a random fade is commanded, this is the minimum total brightness (0-(255*3))
 
@@ -42,8 +45,10 @@ volatile bool clicked_flag = false;
 unsigned long last_fade_ms = 0;
 unsigned long fade_interval = DEFAULT_FADE_TIME_MS;
 
+unsigned int max_brightness = MAX_LED_DUTY;
+
 void setup() 
-{
+{ 
   // The press button
   pinMode(PRESS_BUTTON, INPUT);
   attachInterrupt(digitalPinToInterrupt(PRESS_BUTTON), click_isr, FALLING);
@@ -62,9 +67,9 @@ void setup()
   green_status.setTime(STATUS_LED_FADE_SPEED_MS);
   blue_status.setTime(STATUS_LED_FADE_SPEED_MS);
 
-  red_led.begin(random(0,255));
-  green_led.begin(random(0,255));
-  blue_led.begin(random(0,255));
+  red_led.begin(10);
+  green_led.begin(20);
+  blue_led.begin(50);
   
   red_status.begin(0);
   green_status.begin(0);
@@ -96,18 +101,18 @@ void loop()
   if((millis() > last_fade_ms + fade_interval) && (red_led.done() && green_led.done() && blue_led.done()))
   {
     // Ensure that consecutive fades aren't too close
-    current_red = 255 - red_led.getCurrent();
-    current_green = 255 - green_led.getCurrent();
-    current_blue = 255 - blue_led.getCurrent();
+    current_red = 100 - red_led.getCurrent();
+    current_green = 100 - green_led.getCurrent();
+    current_blue = 100 - blue_led.getCurrent();
     while((total_change < MIN_SUM_FADE_CHANGE) && (total_brightness < MIN_SUM_BRIGHTNESS))
     {
       FadeLed::update();
       FadeStatus::update();
       
       // Generate random values
-      next_red = random(0, 255);
-      next_green = random(0, 255);
-      next_blue = random(0,255);
+      next_red = random(MIN_LED_DUTY, MAX_LED_DUTY);
+      next_green = random(MIN_LED_DUTY, MAX_LED_DUTY);
+      next_blue = random(MIN_LED_DUTY, MAX_LED_DUTY);
   
       // Calculate the sum of the changes
       total_change = (abs(current_red - next_red) + abs(current_green - next_green) + abs(current_blue - next_blue));
@@ -152,7 +157,7 @@ void fade_interval_adjust(unsigned long &last_fade_ms)
   knob.write(0);
 
   // Turns on blue status LED
-  blue_status.set(255);
+  blue_status.set(100);
 
   // Runs until the knob has not been adjusted for timeout_ms
   while((benchmark_ms + control_timeout_ms) > millis())
@@ -164,9 +169,9 @@ void fade_interval_adjust(unsigned long &last_fade_ms)
     if((millis() > last_fade_ms + fade_interval) && (red_led.done() && green_led.done() && blue_led.done()))
     {
       // Ensure that consecutive fades aren't too close
-      current_red = 255 - red_led.getCurrent();
-      current_green = 255 - green_led.getCurrent();
-      current_blue = 255 - blue_led.getCurrent();
+      current_red = 100 - red_led.getCurrent();
+      current_green = 100 - green_led.getCurrent();
+      current_blue = 100 - blue_led.getCurrent();
       total_change = 0;
       total_brightness = 0;
       while((total_change < MIN_SUM_FADE_CHANGE) && (total_brightness < MIN_SUM_BRIGHTNESS))
@@ -175,9 +180,9 @@ void fade_interval_adjust(unsigned long &last_fade_ms)
         FadeStatus::update();
         
         // Generate random values
-        next_red = random(0, 255);
-        next_green = random(0, 255);
-        next_blue = random(0,255);
+        next_red = random(MIN_LED_DUTY, MAX_LED_DUTY);
+        next_green = random(MIN_LED_DUTY, MAX_LED_DUTY);
+        next_blue = random(MIN_LED_DUTY, MAX_LED_DUTY);
     
         // Calculate the sum of the changes
         total_change = (abs(current_red - next_red) + abs(current_green - next_green) + abs(current_blue - next_blue));
@@ -245,7 +250,7 @@ void fade_interval_adjust(unsigned long &last_fade_ms)
     }
     else
     {
-      red_status.set(255);
+      red_status.set(100);
     }
     // Update the timeout benchmark since the knob was changed
     benchmark_ms = millis();

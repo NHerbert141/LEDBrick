@@ -59,7 +59,7 @@ void FadeLed::begin(flvar_t val){
   //set to both so no fading happens
   _setVal = val;
   _curVal = val;
-  analogWrite(this->_pin, getGamma(255 - _curVal));
+  analogWrite(this->_pin, (255 - getGamma(_curVal)));
 }
 
 void FadeLed::set(flvar_t val){
@@ -74,10 +74,9 @@ void FadeLed::set(flvar_t val){
      *  Fixed out of range possibility
      */
     //check for out of range
-    //(inverted)
-    if(255 - val > _biggestStep){
+    if(val > _biggestStep){
       //if bigger then allowed, use biggest value
-      val = 255 - _biggestStep;
+      val = _biggestStep;
     }    
     
     //if it's now fading we have to check how to change it
@@ -119,12 +118,12 @@ bool FadeLed::done(){
 }
 //(inverted)
 void FadeLed::on(){
-  this->set(255 - _biggestStep);
+  this->set(_biggestStep);
 }
 
-//changed to max (inverted)
+//changed to max
 void FadeLed::off(){
-  this->set(255);
+  this->set(0);
 }
 
 void FadeLed::beginOn(){
@@ -181,7 +180,7 @@ flvar_t FadeLed::getBiggestStep(){
 }
 
 void FadeLed::updateThis(){
-  //need to fade up (inverted, actually dims)
+  //need to fade up
   if(_curVal < _setVal){
     flvar_t newVal;
     
@@ -210,7 +209,7 @@ void FadeLed::updateThis(){
         _curVal = newVal;
       }
           
-      analogWrite(this->_pin, getGamma(255 - _curVal) );
+      analogWrite(this->_pin, (255 - getGamma(_curVal)));
     }
     _count++;
   }
@@ -243,7 +242,7 @@ void FadeLed::updateThis(){
         _curVal = newVal;
       }
           
-      analogWrite(this->_pin, getGamma(255 - _curVal) );
+      analogWrite(this->_pin, (255 - getGamma(_curVal)));
     }
     _count++;
   }
